@@ -22,6 +22,7 @@ export type CircleState = {
   walletName: string;
   balance: string;
   poolContractId: string;
+  factoryContractId: string;
   registryContractId: string;
   tokenContractId: string;
   members: string[];
@@ -63,6 +64,7 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
     walletName: "",
     balance: "0",
     poolContractId: process.env.NEXT_PUBLIC_SOROBAN_POOL_CONTRACT_ID || "",
+    factoryContractId: process.env.NEXT_PUBLIC_SOROBAN_FACTORY_CONTRACT_ID || "",
     registryContractId: process.env.NEXT_PUBLIC_SOROBAN_REGISTRY_CONTRACT_ID || "",
     tokenContractId: process.env.NEXT_PUBLIC_SOROBAN_TOKEN_CONTRACT_ID || "",
     members: [],
@@ -89,9 +91,9 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
     }, 4000);
   }, []);
 
-  const fetchOnChainTransactions = useCallback(async (currentContributionAmount?: number, currentMembersLength?: number) => {
+  const fetchOnChainTransactions = useCallback(async (currentContributionAmount?: number, currentMembersLength?: number, poolIdOverride?: string) => {
     try {
-      const poolId = process.env.NEXT_PUBLIC_SOROBAN_POOL_CONTRACT_ID || "";
+      const poolId = poolIdOverride || process.env.NEXT_PUBLIC_SOROBAN_POOL_CONTRACT_ID || "";
       if (!poolId || poolId.startsWith("CC...")) return;
 
       const latestLedgerRes = await rpcServer.getLatestLedger();
@@ -231,7 +233,7 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
           contributedThisCycle: [],
           nextPayoutRecipient: "",
         }));
-        void fetchOnChainTransactions(0, 0);
+        void fetchOnChainTransactions(0, 0, contractId);
         return;
       }
 
@@ -282,13 +284,13 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
         creditScore,
         completedCycles,
       }));
-      void fetchOnChainTransactions(contributionAmount, rawMembers.length);
+      void fetchOnChainTransactions(contributionAmount, rawMembers.length, contractId);
     } catch (e) {
       console.error("Error fetching Soroban circle state:", e);
     } finally {
       setState((prev) => ({ ...prev, loading: false }));
     }
-  }, [state.publicKey, fetchOnChainTransactions]);
+  }, [state.publicKey, state.registryContractId, fetchOnChainTransactions]);
 
   const submitSorobanTransaction = useCallback(async (
     contractId: string,
@@ -358,7 +360,7 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
 
       const newTx: Transaction = {
         id: Math.random().toString(36).substr(2, 9),
-        type: functionName === "create_circle" ? "create" : (functionName === "contribute" ? "contribute" : "payout"),
+        type: functionName === "create_circle" || functionName === "create" ? "create" : (functionName === "contribute" ? "contribute" : "payout"),
         member: state.publicKey,
         amount: state.contributionAmount,
         cycleId: state.currentCycle,
@@ -432,6 +434,7 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
       ...prev,
       mode: "soroban",
       poolContractId: process.env.NEXT_PUBLIC_SOROBAN_POOL_CONTRACT_ID || "",
+      factoryContractId: process.env.NEXT_PUBLIC_SOROBAN_FACTORY_CONTRACT_ID || "",
       registryContractId: process.env.NEXT_PUBLIC_SOROBAN_REGISTRY_CONTRACT_ID || "",
       tokenContractId: process.env.NEXT_PUBLIC_SOROBAN_TOKEN_CONTRACT_ID || "",
     }));
@@ -447,7 +450,45 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
     addToast("Contract configurations updated", "success");
   };
 
+  const readContract = useCallback(async (contractId: string, functionName: string) => {
+    const sourceAddr = state.publicKey || "GCQKBI3RFBB7N73FLCG2IHSX57LF5RN7J4OBONRDBKCHP7P2YG45OZ43";
+    const account = new Account(sourceAddr, "0");
+    const tx = new TransactionBuilder(account, { fee: "100", networkPassphrase: STELLAR_NETWORK_PASSPHRASE })
+      .addOperation(Operation.invokeContractFunction({ contract: contractId, function: functionName, args: [] }))
+      .setTimeout(30)
+      .build();
+    const simulation = await rpcServer.simulateTransaction(tx);
+    if (!rpc.Api.isSimulationSuccess(simulation) || !simulation.result) return null;
+    return scValToNative(simulation.result.retval);
+  }, [state.publicKey]);
+
   const createCircle = async (members: string[], amount: number, length: number) => {
+    if (state.factoryContractId) {
+      const success = await submitSorobanTransaction(
+        state.factoryContractId,
+        "create",
+        [nativeToScVal(state.publicKey, { type: "address" }), xdr.ScVal.scvVec(members.map((m) => nativeToScVal(m, { type: "address" }))), nativeToScVal(BigInt(amount) * BigInt(10000000), { type: "i128" }), nativeToScVal(BigInt(length), { type: "u64" })],
+        "Circle created through factory."
+      );
+      if (!success) return false;
+      const circles = await readContract(state.factoryContractId, "get_circles") as Array<{ pool: string; registry: string; creator: string }> | null;
+      const latest = circles?.[circles.length - 1];
+      if (!latest) {
+        addToast("Circle created, but its address could not be loaded. Refresh and try again.", "error");
+        return false;
+      }
+      setState((prev) => ({
+        ...prev,
+        poolContractId: latest.pool,
+        registryContractId: latest.registry,
+        members,
+        contributionAmount: amount,
+        cycleLength: length,
+        currentCycle: 0,
+      }));
+      await fetchCircleState(latest.pool);
+      return true;
+    }
     // Reset registry contract first to ensure it is clean of any prior circle state
     await submitSorobanTransaction(
       state.registryContractId,
@@ -566,6 +607,7 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
         walletName: state.walletName,
         balance: state.balance,
         poolContractId: state.poolContractId,
+        factoryContractId: state.factoryContractId,
         registryContractId: state.registryContractId,
         tokenContractId: state.tokenContractId,
         transactions: state.transactions,
@@ -578,6 +620,7 @@ export function CircleProvider({ children }: { children: React.ReactNode }) {
     state.walletName,
     state.balance,
     state.poolContractId,
+    state.factoryContractId,
     state.registryContractId,
     state.tokenContractId,
     state.transactions,
