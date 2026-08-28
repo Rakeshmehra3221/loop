@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCircle } from "@/lib/circle-context";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,15 +16,14 @@ import {
 
 export function CreateView() {
   const router = useRouter();
-  const { createCircle, publicKey, mode, members: activeMembers, addToast } = useCircle();
+  const { createCircle, publicKey, mode, loading, members: activeMembers, addToast } = useCircle();
   const [amount, setAmount] = useState("100");
   const [length, setLength] = useState("10");
   const [newMember, setNewMember] = useState("");
 
   // Default member list (pre-filled for ease of use)
   const [members, setMembers] = useState<string[]>([]);
-
-  const isCircleActive = !!publicKey && activeMembers && activeMembers.length > 0;
+  const isCircleActive = Boolean(publicKey && activeMembers?.includes(publicKey));
 
   // Sync members list when mode or connected wallet changes
   React.useEffect(() => {
@@ -70,7 +68,7 @@ export function CreateView() {
     addToast("Member removed", "info");
   };
 
-  const handleCreate = async () => {
+    const handleCreate = async () => {
     if (isCircleActive) {
       addToast("Leave your current circle before creating a new one", "error");
       return;
