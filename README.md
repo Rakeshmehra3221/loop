@@ -10,6 +10,7 @@ Loop is a trustless ROSCA (Rotating Savings and Credit Association) platform bui
 - [Features](#features)
 - [Future Roadmap](#future-roadmap)
 - [Architecture](#architecture)
+- [User Feedback Implemented](#user-feedback-implemented)
 - [Installation & Local Setup](#installation--local-setup)
 - [Smart Contract Development](#smart-contract-development)
 - [CI/CD](#cicd)
@@ -33,7 +34,7 @@ Loop is a trustless ROSCA (Rotating Savings and Credit Association) platform bui
 
 ## Screenshots
 
-### Home
+### Landing
 
 ![Home](public/screenshots/home.png)
 
@@ -45,7 +46,7 @@ Loop is a trustless ROSCA (Rotating Savings and Credit Association) platform bui
 
 ![Create Circle](public/screenshots/create-circle.png)
 
-### Mobile
+### Mobile Responsiveness
 
 <table>
   <tr>
@@ -54,11 +55,15 @@ Loop is a trustless ROSCA (Rotating Savings and Credit Association) platform bui
   </tr>
 </table>
 
+### Analytics Dashboard
+
+![Analytics](public/screenshots/analytics.png)
+
 ### Testnet Transaction
 
 ![Testnet Transaction](public/screenshots/testnet.png)
 
-### Vitest
+### Tests passing
 
 ![Vitest](public/screenshots/tests.png)
 
@@ -155,6 +160,7 @@ Browser
 
 ---
 
+
 ## Installation & Local Setup
 
 ### Prerequisites
@@ -185,8 +191,7 @@ NEXT_PUBLIC_STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
 NEXT_PUBLIC_STELLAR_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 NEXT_PUBLIC_STELLAR_RPC_URL=https://soroban-testnet.stellar.org/
 
-NEXT_PUBLIC_SOROBAN_POOL_CONTRACT_ID=<your pool contract ID>
-NEXT_PUBLIC_SOROBAN_REGISTRY_CONTRACT_ID=<your registry contract ID>
+NEXT_PUBLIC_SOROBAN_FACTORY_CONTRACT_ID=<your circle factory contract ID>
 NEXT_PUBLIC_SOROBAN_TOKEN_CONTRACT_ID=<your SAC token contract ID>
 ```
 
