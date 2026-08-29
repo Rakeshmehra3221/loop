@@ -24,7 +24,7 @@ Loop is a trustless ROSCA (Rotating Savings and Credit Association) platform bui
 |---|---|
 | Live dApp | [loop-stellar.vercel.app](https://loop-stellar.vercel.app) |
 | Demo Video | [Watch on youtube](https://youtu.be/P-EAgVsGwMY) |
-| Circle Factory | [`CBPQP7IAZTMUL6YXFBH3Z5ANR663G3YOQG4CWP2TUSGSDOOM5N5AV5GW`](https://stellar.expert/explorer/testnet/contract/CBPQP7IAZTMUL6YXFBH3Z5ANR663G3YOQG4CWP2TUSGSDOOM5N5AV5GW) |
+| Circle Factory | [`CANI3JCSTVZDWUSKRVURFNE42MVO6E5OMQYTBCCK5IVUE7CUX632VGI3`](https://stellar.expert/explorer/testnet/contract/CANI3JCSTVZDWUSKRVURFNE42MVO6E5OMQYTBCCK5IVUE7CUX632VGI3) |
 | Pool Contract (example circle) | [`CAT3DNIAOEH7KYE5WB4UPKSETDUO33BQ6EI7ZQXQIU4NSE2KPFXQTLJW`](https://stellar.expert/explorer/testnet/contract/CAT3DNIAOEH7KYE5WB4UPKSETDUO33BQ6EI7ZQXQIU4NSE2KPFXQTLJW) |
 | Member Registry (same circle) | [`CANYQ4EUAJC43RJAF5QIMAT2OVYEUAOIBM7EP6EV62WMWLMSFXRCRO4A`](https://stellar.expert/explorer/testnet/contract/CANYQ4EUAJC43RJAF5QIMAT2OVYEUAOIBM7EP6EV62WMWLMSFXRCRO4A) |
 | SAC Token | [`CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`](https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC) |
@@ -159,7 +159,6 @@ Browser
 5. **Next cycle** — dashboard re-fetches state via read-only simulate calls; cycle counter increments automatically.
 
 ---
-
 
 ## Installation & Local Setup
 

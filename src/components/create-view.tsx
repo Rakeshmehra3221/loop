@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCircle } from "@/lib/circle-context";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import {
   Plus,
   Trash2,
@@ -16,7 +17,7 @@ import {
 
 export function CreateView() {
   const router = useRouter();
-  const { createCircle, publicKey, mode, loading, members: activeMembers, addToast } = useCircle();
+  const { createCircle, publicKey, mode, members: activeMembers, addToast } = useCircle();
   const [amount, setAmount] = useState("100");
   const [length, setLength] = useState("10");
   const [newMember, setNewMember] = useState("");

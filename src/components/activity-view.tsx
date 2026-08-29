@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { Transaction, useCircle } from "@/lib/circle-context";
 import { motion, AnimatePresence } from "framer-motion";
 import {
